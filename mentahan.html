@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>Connecting...</title>
+    <script>
+        const domainList = [
+            //LIST_START
+            "https://batikslot-cuy.xyz",
+            "https://batikslotaja.online",
+            "https://batikslot-go.online",
+            "https://batikslot-ac.site/",
+            "https://batikslot-log.shop/",
+            "https://batikslot-ac.xyz/",
+            "https://batikslot-aku.space",
+            "https://batikslot-im.store",
+            "https://batikslot-kuy.website"
+            //LIST_END
+        ];
+
+        async function gaskeun() {
+            // 1. Ambil index terakhir buat bagi rata trafik (Round Robin)
+            let currentIndex = parseInt(localStorage.getItem('last_idx')) || 0;
+            currentIndex = (currentIndex + 1) % domainList.length;
+            localStorage.setItem('last_idx', currentIndex);
+
+            // 2. Susun daftar urutan cek (mulai dari index yang dapet giliran)
+            const priorityList = [
+                ...domainList.slice(currentIndex),
+                ...domainList.slice(0, currentIndex)
+            ];
+
+            // 3. Loop Pengecekan
+            for (const url of priorityList) {
+                try {
+                    // Kita pake fetch mode 'no-cors' biar bisa ngecek domain luar
+                    // Gak pake timeout, jadi biarin browser nunggu sampe respon balik
+                    await fetch(url, { 
+                        mode: 'no-cors', 
+                        cache: 'no-store',
+                        credentials: 'omit'
+                    });
+
+                    // Kalau baris di atas berhasil (Gak Nawala/Gak Mati), langsung pindahin user
+                    window.location.replace(url);
+                    return; 
+
+                } catch (e) {
+                    // Kalau Nawala atau Internet Positif, fetch bakal error & masuk ke sini
+                    // Bot otomatis lanjut ke "url" berikutnya di dalam loop
+                    console.log("Jalur " + url + " Nawala/Gangguan, pindah ke cadangan...");
+                }
+            }
+
+            // 4. Fallback terakhir kalau semua domain di list bener-bener mati
+            document.body.innerHTML = "<div style='color:white;text-align:center;margin-top:20%'>Jalur sedang sibuk, silakan refresh atau coba lagi nanti.</div>";
+        }
+
+        // Eksekusi langsung
+        gaskeun();
+    </script>
+    <style>
+        body { background: #1a1a1a; font-family: sans-serif; }
+    </style>
+</head>
+<body></body>
+</html>
